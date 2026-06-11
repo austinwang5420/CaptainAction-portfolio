@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaptainAction可动队长3D工作室 | 3D玩具设计</title>
+  <meta name="description" content="专注3D打印、积木玩具设计的创客教师。3D建模、3D打印模型、AI画集作品展示。">
+  <link rel="icon" type="image/png" href="assets/images/avatar.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8F7F4;
+      --bg-card: #FFFFFF;
+      --text-primary: #1A1A2E;
+      --text-secondary: #555566;
+      --text-muted: #888899;
+      --accent-yellow: #FFB800;
+      --accent-orange: #FF6B35;
+      --accent-gradient: linear-gradient(135deg, #FFB800 0%, #FF6B35 100%);
+      --accent-gradient-hover: linear-gradient(135deg, #FFA000 0%, #FF5520 100%);
+      --border: #E8E6E1;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+      --shadow-hover: 0 12px 40px rgba(255,107,53,0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --max-width: 1200px;
+      --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    nav.scrolled { box-shadow: var(--shadow-sm); }
+    .nav-inner {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 18px;
+      background: var(--accent-gradient); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 14px; font-weight: 500; transition: var(--transition);
+      position: relative;
+    }
+    .nav-links a:hover { color: var(--accent-orange); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 2px; background: var(--accent-gradient);
+      transition: var(--transition); border-radius: 1px;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .lang-toggle {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 20px; padding: 6px 14px; font-size: 13px;
+      cursor: pointer; color: var(--text-secondary); font-weight: 500;
+      transition: var(--transition);
+    }
+    .lang-toggle:hover { border-color: var(--accent-yellow); color: var(--accent-orange); }
+
+    .mobile-menu-btn {
+      display: none; background: none; border: none;
+      width: 32px; height: 32px; cursor: pointer;
+      flex-direction: column; justify-content: center; gap: 5px;
+    }
+    .mobile-menu-btn span {
+      display: block; width: 24px; height: 2px;
+      background: var(--text-primary); border-radius: 1px;
+      transition: var(--transition);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 100px 24px 60px;
+      background: var(--bg-primary);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -200px; right: -200px;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,184,0,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -100px; left: -100px;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: var(--max-width); margin: 0 auto; width: 100%;
+      display: flex; align-items: center; gap: 80px;
+    }
+    .hero-text { flex: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 20px; padding: 6px 16px; font-size: 13px;
+      color: var(--text-secondary); margin-bottom: 24px;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22C55E; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 56px); font-weight: 900;
+      line-height: 1.15; margin-bottom: 16px; letter-spacing: -0.02em;
+    }
+    .hero h1 .gradient {
+      background: var(--accent-gradient); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 18px; color: var(--text-secondary);
+      margin-bottom: 12px; font-weight: 400;
+    }
+    .hero-desc {
+      font-size: 15px; color: var(--text-muted);
+      margin-bottom: 36px; max-width: 480px; line-height: 1.8;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-gradient); color: #fff;
+      padding: 12px 28px; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 600; text-decoration: none;
+      transition: var(--transition); border: none; cursor: pointer;
+    }
+    .btn-primary:hover {
+      background: var(--accent-gradient-hover);
+      transform: translateY(-2px); box-shadow: var(--shadow-hover);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg-card); color: var(--text-primary);
+      padding: 12px 28px; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 600; text-decoration: none;
+      border: 1px solid var(--border); transition: var(--transition);
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent-yellow);
+      transform: translateY(-2px); box-shadow: var(--shadow-md);
+    }
+    .hero-avatar {
+      flex-shrink: 0; position: relative;
+    }
+    .hero-avatar img {
+      width: 280px; height: 280px; border-radius: var(--radius-xl);
+      object-fit: cover; border: 4px solid var(--bg-primary);
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-avatar::before {
+      content: ''; position: absolute; inset: -8px;
+      border-radius: 32px; background: var(--accent-gradient);
+      opacity: 0.15; z-index: -1;
+    }
+
+    /* ===== SECTIONS ===== */
+    section { padding: 80px 24px; }
+    .section-header {
+      max-width: var(--max-width); margin: 0 auto 48px;
+      text-align: center;
+    }
+    .section-header h2 {
+      font-size: clamp(28px, 3.5vw, 40px); font-weight: 800;
+      margin-bottom: 12px; letter-spacing: -0.02em;
+    }
+    .section-header p {
+      font-size: 16px; color: var(--text-muted); max-width: 500px; margin: 0 auto;
+    }
+
+    /* ===== CATEGORIES ===== */
+    .categories { background: var(--bg-secondary); }
+    .cat-grid {
+      max-width: var(--max-width); margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .cat-card {
+      background: var(--bg-card); border-radius: var(--radius-lg);
+      padding: 40px 32px; text-align: center;
+      border: 1px solid var(--border); transition: var(--transition);
+      cursor: pointer; text-decoration: none; color: inherit;
+    }
+    .cat-card:hover {
+      transform: translateY(-4px); box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+    .cat-icon {
+      width: 64px; height: 64px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 28px;
+    }
+    .cat-card:nth-child(1) .cat-icon { background: rgba(255,184,0,0.12); }
+    .cat-card:nth-child(2) .cat-icon { background: rgba(255,107,53,0.12); }
+    .cat-card:nth-child(3) .cat-icon { background: rgba(139,92,246,0.12); }
+    .cat-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .cat-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ===== WORKS GRID ===== */
+    .works-grid {
+      max-width: var(--max-width); margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .work-card {
+      background: var(--bg-card); border-radius: var(--radius-lg);
+      overflow: hidden; border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .work-card:hover {
+      transform: translateY(-4px); box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+    .work-thumb {
+      width: 100%; aspect-ratio: 4/3; background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+    }
+    .work-thumb img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: var(--transition);
+    }
+    .work-card:hover .work-thumb img { transform: scale(1.05); }
+    .work-tag {
+      position: absolute; top: 12px; left: 12px;
+      background: var(--accent-gradient); color: #fff;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+    }
+    .work-info { padding: 20px; }
+    .work-info h3 {
+      font-size: 17px; font-weight: 700; margin-bottom: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .work-info p {
+      font-size: 14px; color: var(--text-muted); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .work-meta {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 12px; font-size: 12px; color: var(--text-muted);
+    }
+    .work-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      max-width: var(--max-width); margin: 0 auto;
+      text-align: center; padding: 80px 24px;
+    }
+    .empty-icon { font-size: 64px; margin-bottom: 20px; }
+    .empty-state h3 {
+      font-size: 22px; font-weight: 700; margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 15px; color: var(--text-muted); }
+
+    /* ===== ABOUT ===== */
+    .about { background: var(--bg-secondary); }
+    .about-inner {
+      max-width: var(--max-width); margin: 0 auto;
+      display: flex; gap: 80px; align-items: center;
+    }
+    .about-text { flex: 1; }
+    .about-text h2 {
+      font-size: clamp(28px, 3.5vw, 40px); font-weight: 800;
+      margin-bottom: 20px; letter-spacing: -0.02em;
+    }
+    .about-text p {
+      font-size: 16px; color: var(--text-secondary);
+      line-height: 1.8; margin-bottom: 16px;
+    }
+    .about-skills {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px;
+    }
+    .skill-tag {
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 13px; color: var(--text-secondary); font-weight: 500;
+    }
+    .about-contact {
+      flex-shrink: 0; background: var(--bg-card);
+      border-radius: var(--radius-lg); padding: 32px;
+      border: 1px solid var(--border); min-width: 300px;
+    }
+    .about-contact h3 {
+      font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    }
+    .contact-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px; color: var(--text-secondary);
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-item .icon { font-size: 18px; width: 24px; text-align: center; }
+    .contact-item a {
+      color: var(--accent-orange); text-decoration: none;
+      transition: var(--transition);
+    }
+    .contact-item a:hover { color: var(--accent-yellow); }
+    .wechat-qr {
+      margin-top: 16px; text-align: center;
+    }
+    .wechat-qr img {
+      width: 120px; height: 120px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .wechat-qr p { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ===== SEARCH ===== */
+    .search-bar {
+      max-width: 500px; margin: 0 auto 40px; position: relative;
+    }
+    .search-bar input {
+      width: 100%; padding: 14px 20px 14px 48px;
+      border: 2px solid var(--border); border-radius: 50px;
+      font-size: 15px; font-family: var(--font-sans);
+      background: var(--bg-card); color: var(--text-primary);
+      transition: var(--transition); outline: none;
+    }
+    .search-bar input:focus { border-color: var(--accent-yellow); }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .search-bar .search-icon {
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      font-size: 18px; color: var(--text-muted); pointer-events: none;
+    }
+
+    /* ===== FILTER TABS ===== */
+    .filter-tabs {
+      display: flex; justify-content: center; gap: 8px;
+      margin-bottom: 40px; flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 8px 20px; border-radius: 20px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-secondary); transition: var(--transition);
+    }
+    .filter-tab:hover { border-color: var(--accent-yellow); }
+    .filter-tab.active {
+      background: var(--accent-gradient); color: #fff;
+      border-color: transparent;
+    }
+
+    /* ===== GUESTBOOK ===== */
+    .guestbook { background: var(--bg-secondary); }
+    .guestbook-form {
+      max-width: 600px; margin: 0 auto 40px;
+    }
+    .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .form-group { flex: 1; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      margin-bottom: 6px; color: var(--text-secondary);
+    }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px;
+      font-family: var(--font-sans); background: var(--bg-card);
+      color: var(--text-primary); transition: var(--transition);
+      outline: none; resize: vertical;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--accent-yellow);
+    }
+    .form-group textarea { min-height: 100px; }
+    .form-submit {
+      width: 100%; padding: 12px; background: var(--accent-gradient);
+      color: #fff; border: none; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: var(--transition);
+    }
+    .form-submit:hover {
+      background: var(--accent-gradient-hover);
+      transform: translateY(-1px);
+    }
+    .messages-list {
+      max-width: 600px; margin: 0 auto;
+    }
+    .message-item {
+      background: var(--bg-card); border-radius: var(--radius-md);
+      padding: 20px; margin-bottom: 12px; border: 1px solid var(--border);
+    }
+    .message-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .message-author { font-weight: 600; font-size: 14px; }
+    .message-date { font-size: 12px; color: var(--text-muted); }
+    .message-content { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 40px 24px; text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    footer p { font-size: 13px; color: var(--text-muted); }
+    footer .footer-links {
+      display: flex; justify-content: center; gap: 24px;
+      margin-bottom: 16px;
+    }
+    footer .footer-links a {
+      font-size: 20px; text-decoration: none;
+      transition: var(--transition);
+    }
+    footer .footer-links a:hover { transform: translateY(-2px); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .hero-inner { flex-direction: column-reverse; gap: 40px; text-align: center; }
+      .hero-desc { margin: 0 auto 36px; }
+      .hero-actions { justify-content: center; }
+      .hero-avatar img { width: 200px; height: 200px; }
+      .cat-grid { grid-template-columns: 1fr; }
+      .about-inner { flex-direction: column; gap: 40px; }
+      .about-contact { min-width: auto; width: 100%; }
+      .works-grid { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">CaptainAction</a>
+      <ul class="nav-links">
+        <li><a href="#works" data-zh="作品" data-en="Works">作品</a></li>
+        <li><a href="#about" data-zh="关于" data-en="About">关于</a></li>
+        <li><a href="#guestbook" data-zh="留言" data-en="Guestbook">留言</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" id="menuBtn">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text fade-in">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          <span data-zh="可接定制设计" data-en="Open for Custom Design">可接定制设计</span>
+        </div>
+        <h1>
+          <span data-zh="3D玩具设计" data-en="3D Toy Design">3D玩具设计</span><br>
+          <span class="gradient" data-zh="创造无限可能" data-en="Create Infinite Possibilities">创造无限可能</span>
+        </h1>
+        <p class="hero-subtitle" data-zh="专注3D打印、积木玩具设计的创客教师" data-en="Maker Teacher focused on 3D printing & building block toy design">专注3D打印、积木玩具设计的创客教师</p>
+        <p class="hero-desc" data-zh="野生数字艺术家，随性的AI搬运工，朝三暮四的3D建模师，体弱多病的创客教师。用3D打印将想象变为现实。" data-en="Wild digital artist, casual AI porter, fickle 3D modeler, ailing maker teacher. Turning imagination into reality with 3D printing.">野生数字艺术家，随性的AI搬运工，朝三暮四的3D建模师，体弱多病的创客教师。用3D打印将想象变为现实。</p>
+        <div class="hero-actions">
+          <a href="#works" class="btn-primary" data-zh="浏览作品" data-en="Browse Works">浏览作品 →</a>
+          <a href="#about" class="btn-secondary" data-zh="了解更多" data-en="Learn More">了解更多</a>
+        </div>
+      </div>
+      <div class="hero-avatar fade-in">
+        <img src="assets/images/avatar.png" alt="CaptainAction可动队长">
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories" id="categories">
+    <div class="section-header fade-in">
+      <h2 data-zh="作品分类" data-en="Categories">作品分类</h2>
+      <p data-zh="三大创作方向，探索3D设计的无限可能" data-en="Three creative directions, exploring infinite possibilities of 3D design">三大创作方向，探索3D设计的无限可能</p>
+    </div>
+    <div class="cat-grid">
+      <a href="#works" class="cat-card fade-in" onclick="filterWorks('3D建模')">
+        <div class="cat-icon">🧊</div>
+        <h3 data-zh="3D建模" data-en="3D Modeling">3D建模</h3>
+        <p data-zh="积木玩具、机械结构、角色设计等原创3D模型作品" data-en="Original 3D models: building blocks, mechanical structures, character design">积木玩具、机械结构、角色设计等原创3D模型作品</p>
+      </a>
+      <a href="#works" class="cat-card fade-in" onclick="filterWorks('3D打印模型')">
+        <div class="cat-icon">🖨️</div>
+        <h3 data-zh="3D打印模型" data-en="3D Printed Models">3D打印模型</h3>
+        <p data-zh="可动模型、解压玩具、桌面摆件等可打印作品" data-en="Articulated models, fidget toys, desk accessories and more">可动模型、解压玩具、桌面摆件等可打印作品</p>
+      </a>
+      <a href="#works" class="cat-card fade-in" onclick="filterWorks('AI画集')">
+        <div class="cat-icon">🎨</div>
+        <h3 data-zh="AI画集" data-en="AI Art Gallery">AI画集</h3>
+        <p data-zh="AI辅助创作的概念设计、插画与视觉艺术作品" data-en="Concept design, illustrations and visual art created with AI">AI辅助创作的概念设计、插画与视觉艺术作品</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- WORKS -->
+  <section id="works">
+    <div class="section-header fade-in">
+      <h2 data-zh="作品展示" data-en="Portfolio">作品展示</h2>
+      <p data-zh="每一件作品都是一次从想象到现实的旅程" data-en="Every piece is a journey from imagination to reality">每一件作品都是一次从想象到现实的旅程</p>
+    </div>
+    <div class="search-bar fade-in">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" data-zh-placeholder="搜索作品..." data-en-placeholder="Search works..." placeholder="搜索作品..." oninput="searchWorks()">
+    </div>
+    <div class="filter-tabs fade-in">
+      <span class="filter-tab active" data-filter="all" onclick="filterWorks('all')" data-zh="全部" data-en="All">全部</span>
+      <span class="filter-tab" data-filter="3D建模" onclick="filterWorks('3D建模')" data-zh="3D建模" data-en="3D Modeling">3D建模</span>
+      <span class="filter-tab" data-filter="3D打印模型" onclick="filterWorks('3D打印模型')" data-zh="3D打印模型" data-en="3D Prints">3D打印模型</span>
+      <span class="filter-tab" data-filter="AI画集" onclick="filterWorks('AI画集')" data-zh="AI画集" data-en="AI Art">AI画集</span>
+    </div>
+    <div class="works-grid" id="worksGrid">
+      <!-- Works will be loaded from data -->
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">🚧</div>
+      <h3 data-zh="作品正在加载中..." data-en="Works coming soon...">作品正在加载中...</h3>
+      <p data-zh="创作者正在精心准备更多作品，敬请期待！" data-en="The creator is preparing more works, stay tuned!">创作者正在精心准备更多作品，敬请期待！</p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about-inner">
+      <div class="about-text fade-in">
+        <h2 data-zh="关于我" data-en="About Me">关于我</h2>
+        <p data-zh="我是CaptainAction可动队长，一名自由职业者，同时也是一名科学教师。我热爱3D建模和3D打印，专注于积木玩具设计和创意模型开发。我相信，好的设计应该兼具趣味性和教育意义。" data-en="I'm CaptainAction, a freelancer and science teacher. I love 3D modeling and printing, focusing on building block toy design and creative model development. I believe good design should be both fun and educational.">我是CaptainAction可动队长，一名自由职业者，同时也是一名科学教师。我热爱3D建模和3D打印，专注于积木玩具设计和创意模型开发。我相信，好的设计应该兼具趣味性和教育意义。</p>
+        <p data-zh="除了3D设计，我也在探索AI辅助创作的可能性，尝试将AI技术与传统设计相结合，创造出独特的视觉作品。" data-en="Beyond 3D design, I'm also exploring AI-assisted creation, combining AI technology with traditional design to create unique visual works.">除了3D设计，我也在探索AI辅助创作的可能性，尝试将AI技术与传统设计相结合，创造出独特的视觉作品。</p>
+        <div class="about-skills">
+          <span class="skill-tag">3D建模</span>
+          <span class="skill-tag">3D打印</span>
+          <span class="skill-tag">积木玩具设计</span>
+          <span class="skill-tag">STEM教育</span>
+          <span class="skill-tag">AI绘图</span>
+          <span class="skill-tag">编程教学</span>
+        </div>
+      </div>
+      <div class="about-contact fade-in">
+        <h3 data-zh="联系方式" data-en="Contact">联系方式</h3>
+        <div class="contact-item">
+          <span class="icon">📧</span>
+          <a href="mailto:skyblue5420@163.com">skyblue5420@163.com</a>
+        </div>
+        <div class="contact-item">
+          <span class="icon">💬</span>
+          <span data-zh="微信：可动队长Action" data-en="WeChat: CaptainAction">微信：可动队长Action</span>
+        </div>
+        <div class="contact-item">
+          <span class="icon">📺</span>
+          <a href="https://space.bilibili.com/5947104" target="_blank">B站</a>
+        </div>
+        <div class="contact-item">
+          <span class="icon">📕</span>
+          <a href="https://www.xiaohongshu.com/user/profile/60f8ee4a0000000001000c48" target="_blank">小红书</a>
+        </div>
+        <div class="wechat-qr">
+          <img src="assets/images/wechat_qrcode.jpeg" alt="WeChat QR">
+          <p data-zh="扫码添加微信" data-en="Scan to add WeChat">扫码添加微信</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUESTBOOK -->
+  <section class="guestbook" id="guestbook">
+    <div class="section-header fade-in">
+      <h2 data-zh="访客留言" data-en="Guestbook">访客留言</h2>
+      <p data-zh="欢迎留下你的想法和建议" data-en="Feel free to leave your thoughts and suggestions">欢迎留下你的想法和建议</p>
+    </div>
+    <div class="guestbook-form fade-in">
+      <div class="form-row">
+        <div class="form-group">
+          <label data-zh="昵称" data-en="Name">昵称</label>
+          <input type="text" id="guestName" data-zh-placeholder="你的昵称" data-en-placeholder="Your name" placeholder="你的昵称">
+        </div>
+        <div class="form-group">
+          <label data-zh="邮箱（选填）" data-en="Email (optional)">邮箱（选填）</label>
+          <input type="email" id="guestEmail" data-zh-placeholder="your@email.com" data-en-placeholder="your@email.com" placeholder="your@email.com">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label data-zh="留言内容" data-en="Message">留言内容</label>
+        <textarea id="guestMessage" data-zh-placeholder="说点什么吧..." data-en-placeholder="Say something..." placeholder="说点什么吧..."></textarea>
+      </div>
+      <button class="form-submit" onclick="submitMessage()" data-zh="提交留言" data-en="Submit">提交留言</button>
+    </div>
+    <div class="messages-list" id="messagesList"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://space.bilibili.com/5947104" target="_blank" title="B站">📺</a>
+      <a href="https://www.xiaohongshu.com/user/profile/60f8ee4a0000000001000c48" target="_blank" title="小红书">📕</a>
+      <a href="mailto:skyblue5420@163.com" title="邮箱">📧</a>
+    </div>
+    <p>© 2026 CaptainAction可动队长3D工作室. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // ===== DATA =====
+    // Works data - populated from Feishu Bitable
+    let worksData = [];
+    let currentLang = 'zh';
+    let currentFilter = 'all';
+
+    // ===== LOAD WORKS FROM FEISHU =====
+    async function loadWorks() {
+      try {
+        const resp = await fetch('data/works.json');
+        if (resp.ok) {
+          worksData = await resp.json();
+        }
+      } catch(e) {
+        console.log('Using empty works data');
+      }
+      renderWorks();
+    }
+
+    // ===== RENDER WORKS =====
+    function renderWorks() {
+      const grid = document.getElementById('worksGrid');
+      const empty = document.getElementById('emptyState');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+
+      let filtered = worksData.filter(w => {
+        const matchFilter = currentFilter === 'all' || w.category === currentFilter;
+        const matchSearch = !search ||
+          (w.title || '').toLowerCase().includes(search) ||
+          (w.description || '').toLowerCase().includes(search) ||
+          (w.tags || '').toLowerCase().includes(search);
+        return matchFilter && matchSearch && w.status === '已发布';
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.innerHTML = filtered.map(w => `
+        <div class="work-card fade-in visible">
+          <div class="work-thumb">
+            ${w.cover ? `<img src="${w.cover}" alt="${w.title}" loading="lazy">` : '<div style="font-size:48px;">📦</div>'}
+            <span class="work-tag">${w.category}</span>
+          </div>
+          <div class="work-info">
+            <h3>${w.title}</h3>
+            <p>${w.description || ''}</p>
+            <div class="work-meta">
+              ${w.date ? `<span>📅 ${w.date}</span>` : ''}
+              ${w.tags ? `<span>🏷️ ${w.tags}</span>` : ''}
+              ${w.link ? `<span><a href="${w.link}" target="_blank" style="color:var(--accent-orange);text-decoration:none;">🔗 链接</a></span>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ===== FILTER =====
+    function filterWorks(category) {
+      currentFilter = category;
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === category);
+      });
+      renderWorks();
+    }
+
+    // ===== SEARCH =====
+    function searchWorks() { renderWorks(); }
+
+    // ===== LANGUAGE TOGGLE =====
+    function toggleLang() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      document.getElementById('langBtn').textContent = currentLang === 'zh' ? 'EN' : '中文';
+      document.querySelectorAll('[data-zh]').forEach(el => {
+        el.textContent = el.dataset[currentLang] || el.dataset.zh;
+      });
+      document.querySelectorAll('[data-zh-placeholder]').forEach(el => {
+        el.placeholder = el.dataset[`data-${currentLang}-placeholder`] || el.dataset.zhPlaceholder;
+      });
+    }
+
+    // ===== GUESTBOOK =====
+    function loadMessages() {
+      try {
+        const msgs = JSON.parse(localStorage.getItem('guestbook') || '[]');
+        const list = document.getElementById('messagesList');
+        list.innerHTML = msgs.map(m => `
+          <div class="message-item">
+            <div class="message-header">
+              <span class="message-author">${escapeHtml(m.name)}</span>
+              <span class="message-date">${m.date}</span>
+            </div>
+            <div class="message-content">${escapeHtml(m.message)}</div>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    function submitMessage() {
+      const name = document.getElementById('guestName').value.trim();
+      const message = document.getElementById('guestMessage').value.trim();
+      if (!name || !message) {
+        alert(currentLang === 'zh' ? '请填写昵称和留言内容' : 'Please fill in name and message');
+        return;
+      }
+      const msgs = JSON.parse(localStorage.getItem('guestbook') || '[]');
+      msgs.unshift({
+        name, message,
+        date: new Date().toLocaleDateString('zh-CN'),
+        email: document.getElementById('guestEmail').value.trim()
+      });
+      localStorage.setItem('guestbook', JSON.stringify(msgs));
+      document.getElementById('guestName').value = '';
+      document.getElementById('guestEmail').value = '';
+      document.getElementById('guestMessage').value = '';
+      loadMessages();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ===== NAV SCROLL =====
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // ===== FADE IN =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // ===== MOBILE MENU =====
+    function toggleMobileMenu() {
+      const links = document.querySelector('.nav-links');
+      links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+      links.style.position = 'absolute';
+      links.style.top = '64px';
+      links.style.left = '0';
+      links.style.right = '0';
+      links.style.background = 'rgba(255,255,255,0.98)';
+      links.style.flexDirection = 'column';
+      links.style.padding = '20px';
+      links.style.gap = '16px';
+      links.style.borderBottom = '1px solid var(--border)';
+    }
+
+    // ===== INIT =====
+    loadWorks();
+    loadMessages();
+  </script>
+</body>
+</html>
