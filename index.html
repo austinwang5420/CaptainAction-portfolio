@@ -1421,6 +1421,13 @@
     let currentLang = 'zh';
     let currentFilter = 'all';
 
+    // ===== VIEW COUNT (localStorage-based) =====
+    function getViewCount(id, baseViews) {
+      const stored = localStorage.getItem('views_' + id);
+      if (stored !== null) return parseInt(stored);
+      return baseViews || 0;
+    }
+
     // ===== LOAD WORKS =====
     async function loadWorks() {
       try {
@@ -1440,7 +1447,7 @@
       const grid = document.getElementById('top3Grid');
       const top3 = worksData
         .filter(w => w.status === '已发布')
-        .sort((a, b) => (b.views || 0) - (a.views || 0))
+        .sort((a, b) => getViewCount(b.id, b.views) - getViewCount(a.id, a.views))
         .slice(0, 3);
 
       if (top3.length === 0) {
@@ -1451,7 +1458,7 @@
       const rankColors = ['rank-1', 'rank-2', 'rank-3'];
       grid.innerHTML = top3.map((w, i) => {
         const rank = rankColors[i];
-        const views = w.views || 0;
+        const views = getViewCount(w.id, w.views);
         const link = w.category === '教程系列'
           ? (w.link || '#')
           : `product.html?id=${w.id}`;
@@ -1499,7 +1506,7 @@
         const catClass = w.category === 'AI建模' ? 'cat-modeling' :
                          w.category === '模型下载' ? 'cat-print' :
                          w.category === '教程系列' ? 'cat-tutorial' : 'cat-ai';
-        const views = w.views || 0;
+        const views = getViewCount(w.id, w.views);
         return `
           <div class="work-card fade-in visible" style="animation-delay:${i * 0.05}s">
             <div class="work-thumb">

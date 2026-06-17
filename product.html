@@ -794,12 +794,34 @@
     // ===== DATA =====
     let worksData = [];
 
+    // ===== VIEW COUNT (localStorage-based) =====
+    function getViewCount(id, baseViews) {
+      const stored = localStorage.getItem('views_' + id);
+      if (stored !== null) return parseInt(stored);
+      return baseViews || 0;
+    }
+
+    function incrementView(id, baseViews) {
+      const current = getViewCount(id, baseViews);
+      const newCount = current + 1;
+      localStorage.setItem('views_' + id, newCount);
+      return newCount;
+    }
+
     // ===== LOAD WORKS DATA =====
     async function loadWorks() {
       try {
         const resp = await fetch('data/works.json');
         if (!resp.ok) throw new Error('Failed to load');
         worksData = await resp.json();
+        // Increment view count for this product
+        const id = getParam('id');
+        if (id) {
+          const work = worksData.find(w => w.id === id);
+          if (work) {
+            incrementView(id, work.views);
+          }
+        }
         renderProduct();
       } catch(e) {
         document.getElementById('loadingState').style.display = 'none';
@@ -880,7 +902,7 @@
           <div class="product-info">
             <div class="product-tag-line">
               ${work.tags ? `<span class="product-tag">${work.tags}</span>` : ''}
-              ${work.views > 0 ? `<span class="product-views-badge">▲ ${work.views.toLocaleString()} 次浏览</span>` : ''}
+              ${getViewCount(work.id, work.views) > 0 ? `<span class="product-views-badge">▲ ${getViewCount(work.id, work.views).toLocaleString()} 次浏览</span>` : ''}
             </div>
 
             <h1 class="product-title">${work.title}</h1>

@@ -1,18 +1,5 @@
 [
   {
-    "id": "recevpZRlM",
-    "title": "ULTRA PREATOR HELMET执政官头盔",
-    "category": "AI建模",
-    "description": "极限执政官用头盔-付费下载",
-    "tags": "战棋",
-    "status": "已发布",
-    "link": "https://www.myminifactory.com/object/3d-print-ultra-preator-helmet-777938",
-    "date": "1773504000",
-    "cover": "assets/images/works/recevpZRlM.png",
-    "views": 2856,
-    "gallery": []
-  },
-  {
     "id": "rec7XDbBgz",
     "title": "大头TEKKAMAN骑士",
     "category": "AI建模",
@@ -20,9 +7,23 @@
     "tags": "摆件",
     "status": "已发布",
     "link": "https://www.myminifactory.com/object/3d-print-chibi-space-warrior-tekkaman-770468",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "assets/images/works/rec7XDbBgz.png",
     "views": 1923,
+    "gallery": [],
+    "backup_link": "https://cults3d.com/en/3d-model/game/chibi-space-warrior-tekkaman"
+  },
+  {
+    "id": "recevpZRlM",
+    "title": "ULTRA PREATOR HELMET执政官头盔",
+    "category": "AI建模",
+    "description": "极限执政官用头盔-付费下载",
+    "tags": "战棋",
+    "status": "已发布",
+    "link": "https://www.myminifactory.com/object/3d-print-ultra-preator-helmet-777938",
+    "date": "2026.03",
+    "cover": "assets/images/works/recevpZRlM.png",
+    "views": 2856,
     "gallery": []
   },
   {
@@ -33,20 +34,21 @@
     "tags": "摆件",
     "status": "已发布",
     "link": "https://www.myminifactory.com/object/3d-print-chibi-police-robot-av-98-770450",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "assets/images/works/recItju7lY.png",
     "views": 1547,
-    "gallery": []
+    "gallery": [],
+    "backup_link": "https://cults3d.com/en/3d-model/game/sd-robot-police"
   },
   {
     "id": "recDownload01",
-    "title": "可动小龙印刷件",
+    "title": "可动积木关节组件包",
     "category": "模型下载",
-    "description": "一站式打印可动龙，无需支撑",
-    "tags": "可动",
+    "description": "通用积木关节配件，兼容主流积木系统，免费下载",
+    "tags": "配件",
     "status": "已发布",
     "link": "https://www.myminifactory.com/",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "",
     "views": 892,
     "gallery": []
@@ -59,7 +61,7 @@
     "tags": "解压",
     "status": "已发布",
     "link": "https://www.cults3d.com/",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "",
     "views": 645,
     "gallery": []
@@ -72,7 +74,7 @@
     "tags": "入门",
     "status": "已发布",
     "link": "https://space.bilibili.com/5947104",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "",
     "views": 1180,
     "gallery": []
@@ -85,7 +87,7 @@
     "tags": "进阶",
     "status": "已发布",
     "link": "https://space.bilibili.com/5947104",
-    "date": "1773504000",
+    "date": "2026.03",
     "cover": "",
     "views": 756,
     "gallery": []
