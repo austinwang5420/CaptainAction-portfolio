@@ -1555,10 +1555,15 @@
       }).join('');
     }
 
-    function formatDate(ts) {
-      if (!ts) return '';
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      // works.json stores dates as 'YYYY.MM' strings from sync script
+      if (typeof dateStr === 'string' && dateStr.match(/^\d{4}\.\d{2}$/)) {
+        return dateStr;
+      }
+      // Fallback: treat as Unix timestamp (seconds)
       try {
-        const d = new Date(parseInt(ts) * 1000);
+        const d = new Date(parseInt(dateStr) * 1000);
         return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0');
       } catch(e) { return ''; }
     }
