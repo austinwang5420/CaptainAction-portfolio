@@ -151,15 +151,18 @@ def sync():
     records = get_records(token)
     print(f"   Found {len(records)} records total")
 
-    # Load existing works.json to preserve local-only fields (views, gallery)
-    existing_data = {}
+    # Load existing works.json to preserve local-only fields (views, gallery, cover)
+    existing_by_id = {}
+    existing_by_title = {}
     data_path = os.path.abspath(DATA_PATH)
     if os.path.exists(data_path):
         with open(data_path, encoding='utf-8') as f:
             old_works = json.load(f)
         for w in old_works:
             if w.get('id'):
-                existing_data[w['id']] = w
+                existing_by_id[w['id']] = w
+            if w.get('title'):
+                existing_by_title[w['title']] = w
 
     works = []
     skipped = 0
@@ -198,8 +201,11 @@ def sync():
                     if g_path:
                         gallery.append(g_path)
 
-        # Build work object
-        old = existing_data.get(rid, {})
+        # Build work object — match by ID first, then by title (handles Feishu record ID changes)
+        old = existing_by_id.get(rid, {})
+        if not old and title and title in existing_by_title:
+            old = existing_by_title[title]
+            print(f"   🔄 ID changed for '{title}': inherited local data")
         work = {
             'id': rid,
             'title': title,
