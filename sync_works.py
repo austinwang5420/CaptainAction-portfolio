@@ -241,7 +241,15 @@ def sync():
     for w in works:
         status_icon = "🟢" if w.get('status') == '已发布' else "🟡"
         cover_icon = "🖼️" if w.get('cover') else "❌"
-        print(f"   {status_icon} {cover_icon} [{w.get('category', '?')}] {w.get('title', '?')} (views: {w.get('views', 0)})")
+        detail = "✅详情" if w.get('id') else "❌无ID"
+        print(f"   {status_icon} {cover_icon} {detail} [{w.get('category', '?')}] {w.get('title', '?')} (views: {w.get('views', 0)})")
+
+    # Validate: every work must have id (required for detail page links)
+    missing_id = [w for w in works if not w.get('id')]
+    if missing_id:
+        print(f"\n⚠️  WARNING: {len(missing_id)} works missing 'id' field — detail page links will not work!")
+    else:
+        print(f"\n✅ All {len(works)} works have valid IDs — '查看详情' links active for every work")
 
 
 if __name__ == '__main__':

@@ -1481,7 +1481,7 @@
         const rank = rankColors[i];
         const views = getViewCount(w.id, w.views);
         const link = w.category === '教程系列'
-          ? (w.link || '#')
+          ? (w.link || 'https://space.bilibili.com/5947104')
           : `product.html?id=${w.id}`;
         const target = w.category === '教程系列' ? ' target="_blank" rel="noopener noreferrer"' : '';
         return `
@@ -1528,23 +1528,26 @@
                          w.category === '模型下载' ? 'cat-print' :
                          w.category === '教程系列' ? 'cat-tutorial' : 'cat-ai';
         const views = getViewCount(w.id, w.views);
+        const detailLink = w.category === '教程系列'
+          ? (w.link || 'https://space.bilibili.com/5947104')
+          : `product.html?id=${w.id}`;
+        const detailTarget = w.category === '教程系列' ? ' target="_blank" rel="noopener noreferrer"' : '';
         return `
           <div class="work-card fade-in visible" style="animation-delay:${i * 0.05}s">
-            <div class="work-thumb">
-              ${w.cover ? `<img src="${w.cover}" alt="${w.title}" loading="lazy">` : '<div class="work-thumb-placeholder">◆</div>'}
-              <span class="work-tag ${catClass}">${w.category}</span>
-              ${w.tags ? `<span class="work-sticker">${w.tags}</span>` : ''}
-            </div>
+            <a href="${detailLink}"${detailTarget} class="work-thumb-link" style="display:block; text-decoration:none; color:inherit;">
+              <div class="work-thumb">
+                ${w.cover ? `<img src="${w.cover}" alt="${w.title}" loading="lazy">` : '<div class="work-thumb-placeholder">◆</div>'}
+                <span class="work-tag ${catClass}">${w.category}</span>
+                ${w.tags ? `<span class="work-sticker">${w.tags}</span>` : ''}
+              </div>
+            </a>
             <div class="work-info">
               <h3>${w.title}</h3>
               <p>${w.description || ''}</p>
               <div class="work-meta">
                 ${w.date ? `<span>${formatDate(w.date)}</span>` : ''}
                 ${views > 0 ? `<span class="work-views">▲ ${views.toLocaleString()}</span>` : ''}
-                ${w.link ? (w.category === '教程系列'
-                  ? `<span><a href="${w.link}" target="_blank" rel="noopener noreferrer">查看详情 →</a></span>`
-                  : `<span><a href="product.html?id=${w.id}">查看详情 →</a></span>`)
-                  : ''}
+                <span><a href="${detailLink}"${detailTarget}>查看详情 →</a></span>
               </div>
             </div>
           </div>
