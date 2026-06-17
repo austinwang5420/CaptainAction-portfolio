@@ -1452,8 +1452,12 @@
       grid.innerHTML = top3.map((w, i) => {
         const rank = rankColors[i];
         const views = w.views || 0;
+        const link = w.category === '教程系列'
+          ? (w.link || '#')
+          : `product.html?id=${w.id}`;
+        const target = w.category === '教程系列' ? ' target="_blank" rel="noopener noreferrer"' : '';
         return `
-          <div class="top3-card ${rank} fade-in visible" style="animation-delay:${i * 0.1}s">
+          <a href="${link}"${target} class="top3-card ${rank} fade-in visible" style="animation-delay:${i * 0.1}s; text-decoration:none; color:inherit;">
             <span class="top3-rank">${i + 1}</span>
             <div class="top3-thumb">
               ${w.cover ? `<img src="${w.cover}" alt="${w.title}" loading="lazy">` : '<div class="top3-thumb-placeholder">◆</div>'}
@@ -1464,7 +1468,7 @@
               <p>${w.description || ''}</p>
               <span class="top3-tag">${w.category}</span>
             </div>
-          </div>
+          </a>
         `;
       }).join('');
     }
@@ -1509,7 +1513,10 @@
               <div class="work-meta">
                 ${w.date ? `<span>${formatDate(w.date)}</span>` : ''}
                 ${views > 0 ? `<span class="work-views">▲ ${views.toLocaleString()}</span>` : ''}
-                ${w.link ? `<span><a href="${w.link}" target="_blank" rel="noopener noreferrer">查看详情 →</a></span>` : ''}
+                ${w.link ? (w.category === '教程系列'
+                  ? `<span><a href="${w.link}" target="_blank" rel="noopener noreferrer">查看详情 →</a></span>`
+                  : `<span><a href="product.html?id=${w.id}">查看详情 →</a></span>`)
+                  : ''}
               </div>
             </div>
           </div>
