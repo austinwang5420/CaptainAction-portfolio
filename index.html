@@ -1421,8 +1421,26 @@
     let currentLang = 'zh';
     let currentFilter = 'all';
 
-    // ===== VIEW COUNT (localStorage-based) =====
+    // ===== VIEW COUNT (server-backed with localStorage fallback) =====
+    let serverViews = {}; // cached server view counts
+
+    async function fetchServerViews(ids) {
+      if (!ids.length) return {};
+      try {
+        const resp = await fetch('/api/views?ids=' + ids.join(','));
+        if (!resp.ok) return {};
+        const result = await resp.json();
+        const map = {};
+        (result.data || []).forEach(item => { map[item.id] = item.views; });
+        return map;
+      } catch(e) {
+        return {};
+      }
+    }
+
     function getViewCount(id, baseViews) {
+      // Priority: server > localStorage > base
+      if (serverViews[id] !== undefined) return serverViews[id];
       const stored = localStorage.getItem('views_' + id);
       if (stored !== null) return parseInt(stored);
       return baseViews || 0;
@@ -1438,6 +1456,9 @@
       } catch(e) {
         console.log('Using empty works data');
       }
+      // Fetch server-side view counts
+      const ids = worksData.map(w => w.id).filter(Boolean);
+      serverViews = await fetchServerViews(ids);
       renderTop3();
       renderWorks();
     }

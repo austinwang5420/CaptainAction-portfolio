@@ -793,19 +793,25 @@
   <script>
     // ===== DATA =====
     let worksData = [];
+    let currentServerViews = 0;
 
-    // ===== VIEW COUNT (localStorage-based) =====
+    // ===== VIEW COUNT (server-backed with localStorage fallback) =====
     function getViewCount(id, baseViews) {
+      if (currentServerViews > 0) return currentServerViews;
       const stored = localStorage.getItem('views_' + id);
       if (stored !== null) return parseInt(stored);
       return baseViews || 0;
     }
 
-    function incrementView(id, baseViews) {
-      const current = getViewCount(id, baseViews);
-      const newCount = current + 1;
-      localStorage.setItem('views_' + id, newCount);
-      return newCount;
+    async function incrementServerView(id) {
+      try {
+        const resp = await fetch('/api/views?id=' + encodeURIComponent(id), { method: 'POST' });
+        if (!resp.ok) return 0;
+        const data = await resp.json();
+        return data.views || 0;
+      } catch(e) {
+        return 0;
+      }
     }
 
     // ===== LOAD WORKS DATA =====
@@ -814,12 +820,12 @@
         const resp = await fetch('data/works.json');
         if (!resp.ok) throw new Error('Failed to load');
         worksData = await resp.json();
-        // Increment view count for this product
+        // Increment server-side view count for this product
         const id = getParam('id');
         if (id) {
           const work = worksData.find(w => w.id === id);
           if (work) {
-            incrementView(id, work.views);
+            currentServerViews = await incrementServerView(id);
           }
         }
         renderProduct();
