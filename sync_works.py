@@ -51,10 +51,15 @@ def get_records(token):
     return all_records
 
 
-def download_cover(token, file_token, record_id, fallback_name):
-    """Download cover image from Feishu to local assets directory."""
+def download_cover(token, file_token, record_id, fallback_name, stored_token=None):
+    """Download cover image from Feishu to local assets directory.
+
+    Re-downloads if:
+    - File doesn't exist locally
+    - File token has changed (image updated in Feishu)
+    """
     if not file_token:
-        return ''
+        return '', file_token
     # Ensure cover directory exists
     os.makedirs(COVER_DIR, exist_ok=True)
 
@@ -66,10 +71,20 @@ def download_cover(token, file_token, record_id, fallback_name):
     local_filename = f"{record_id}{ext}"
     local_path = os.path.join(COVER_DIR, local_filename)
 
-    # Skip if already downloaded
-    if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
+    # Check if we need to (re)download
+    token_changed = (stored_token is not None and stored_token != file_token)
+    if token_changed:
+        print(f"   🔄 Image updated in Feishu (token changed), re-downloading: {local_filename}")
+        # Remove old file so extension change doesn't leave duplicates
+        for old_ext in ['.png', '.jpg', '.jpeg', '.webp', '.gif']:
+            old_path = os.path.join(COVER_DIR, f"{record_id}{old_ext}")
+            if old_path != local_path and os.path.exists(old_path):
+                os.remove(old_path)
+                print(f"   🗑️ Removed old: {record_id}{old_ext}")
+
+    if not token_changed and os.path.exists(local_path) and os.path.getsize(local_path) > 0:
         print(f"   📎 Cover already exists: {local_filename}")
-        return f"assets/images/works/{local_filename}"
+        return f"assets/images/works/{local_filename}", file_token
 
     # Download via Feishu media API
     url = f"https://open.feishu.cn/open-apis/drive/v1/medias/{file_token}/download"
@@ -84,7 +99,7 @@ def download_cover(token, file_token, record_id, fallback_name):
                 with open(local_path, 'wb') as f:
                     f.write(img_data)
                 print(f"   🖼️ Downloaded cover: {local_filename} ({len(img_data)//1024}KB)")
-                return f"assets/images/works/{local_filename}"
+                return f"assets/images/works/{local_filename}", file_token
             else:
                 print(f"   ⚠️ Empty image data for {record_id}")
                 break
@@ -94,7 +109,7 @@ def download_cover(token, file_token, record_id, fallback_name):
                 time.sleep(1)
             else:
                 print(f"   ❌ Failed to download cover for {record_id}: {e}")
-    return ''
+    return '', file_token
 
 
 def parse_link(value):
@@ -135,7 +150,8 @@ def format_date(value):
         return str(value)
 
 
-def sync():
+def sync(force=False):
+    """Sync from Feishu. If force=True, re-download all images regardless of token."""
     # Load config
     config_path = os.path.abspath(CONFIG_PATH)
     if not os.path.exists(config_path):
@@ -178,8 +194,17 @@ def sync():
 
         title = fields.get('作品名称', '')
 
+        # Get stored tokens for change detection
+        old = existing_by_id.get(rid, {})
+        if not old and title and title in existing_by_title:
+            old = existing_by_title[title]
+            print(f"   🔄 ID changed for '{title}': inherited local data")
+        old_cover_token = old.get('_cover_token', '')
+        old_gallery_tokens = old.get('_gallery_tokens', [])
+
         # Parse cover image
         cover = ''
+        cover_token_new = ''
         cover_field = fields.get('封面图', [])
         if isinstance(cover_field, list) and len(cover_field) > 0:
             file_info = cover_field[0]
@@ -187,25 +212,26 @@ def sync():
             file_name = file_info.get('name', '')
             if file_token:
                 print(f"   📥 Downloading cover for: {title}")
-                cover = download_cover(token, file_token, rid, file_name)
+                # In force mode, pass stored_token=None to skip cache check
+                check_token = None if force else old_cover_token
+                cover, cover_token_new = download_cover(token, file_token, rid, file_name, check_token)
 
         # Parse gallery images
         gallery = []
+        gallery_tokens_new = []
         gallery_field = fields.get('更多图片', [])
         if isinstance(gallery_field, list):
             for idx, img_info in enumerate(gallery_field):
                 ft = img_info.get('file_token', '')
                 fn = img_info.get('name', '')
                 if ft:
-                    g_path = download_cover(token, ft, f"{rid}_g{idx}", fn)
+                    stored_gt = None if force else (old_gallery_tokens[idx] if idx < len(old_gallery_tokens) else None)
+                    g_path, g_token = download_cover(token, ft, f"{rid}_g{idx}", fn, stored_gt)
                     if g_path:
                         gallery.append(g_path)
+                        gallery_tokens_new.append(g_token)
 
         # Build work object — match by ID first, then by title (handles Feishu record ID changes)
-        old = existing_by_id.get(rid, {})
-        if not old and title and title in existing_by_title:
-            old = existing_by_title[title]
-            print(f"   🔄 ID changed for '{title}': inherited local data")
         work = {
             'id': rid,
             'title': title,
@@ -217,7 +243,9 @@ def sync():
             'date': format_date(fields.get('创建日期')),
             'cover': cover or old.get('cover', ''),
             'views': old.get('views', 0),  # Preserve local views
-            'gallery': gallery if gallery else old.get('gallery', [])
+            'gallery': gallery if gallery else old.get('gallery', []),
+            '_cover_token': cover_token_new or old_cover_token,  # Track for change detection
+            '_gallery_tokens': gallery_tokens_new if gallery_tokens_new else old_gallery_tokens
         }
 
         # Preserve backup link if exists
@@ -253,4 +281,7 @@ def sync():
 
 
 if __name__ == '__main__':
-    sync()
+    force = '--force' in sys.argv or '-f' in sys.argv
+    if force:
+        print("🔥 Force mode: re-downloading ALL images")
+    sync(force=force)
