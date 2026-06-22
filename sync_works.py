@@ -10,6 +10,7 @@ Usage: python3 sync_works.py
 """
 
 import json, urllib.request, ssl, os, sys, time
+from PIL import Image
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(SCRIPT_DIR, '..', '.feishu_config')
@@ -20,6 +21,10 @@ APP_TOKEN = "I9UFb9rCsa4OyksLNAIcH7Ujnoh"
 TABLE_ID = "tbl8taqOWKFwjPFj"
 
 ctx = ssl.create_default_context()
+
+# Image compression settings
+MAX_DIMENSION = 1200      # Max width/height in pixels (retina-ready for 600px containers)
+WEBP_QUALITY = 85         # Visually lossless for web display
 
 
 def get_token(app_id, app_secret):
@@ -51,40 +56,96 @@ def get_records(token):
     return all_records
 
 
-def download_cover(token, file_token, record_id, fallback_name, stored_token=None):
-    """Download cover image from Feishu to local assets directory.
+def compress_to_webp(src_path, record_id):
+    """Compress image to WebP format with resize.
 
-    Re-downloads if:
-    - File doesn't exist locally
+    - Resizes so the longest edge is at most MAX_DIMENSION px
+    - Converts to WebP at WEBP_QUALITY (visually lossless)
+    - Deletes the original file
+    - Returns the relative path to the .webp file
+    """
+    webp_filename = f"{record_id}.webp"
+    webp_path = os.path.join(COVER_DIR, webp_filename)
+    src_size = os.path.getsize(src_path)
+
+    try:
+        img = Image.open(src_path)
+        # Convert RGBA to RGB for WebP (keep alpha if PNG with transparency)
+        has_alpha = img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info)
+
+        # Resize if exceeds MAX_DIMENSION (maintain aspect ratio)
+        w, h = img.size
+        if max(w, h) > MAX_DIMENSION:
+            if w >= h:
+                new_w = MAX_DIMENSION
+                new_h = int(h * MAX_DIMENSION / w)
+            else:
+                new_h = MAX_DIMENSION
+                new_w = int(w * MAX_DIMENSION / h)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+            dim_note = f" {w}x{h}→{new_w}x{new_h}"
+        else:
+            dim_note = f" {w}x{h}"
+
+        # Save as WebP
+        if has_alpha:
+            img.save(webp_path, 'WEBP', quality=WEBP_QUALITY, method=6)
+        else:
+            img = img.convert('RGB')
+            img.save(webp_path, 'WEBP', quality=WEBP_QUALITY, method=6)
+
+        webp_size = os.path.getsize(webp_path)
+        ratio = (1 - webp_size / src_size) * 100 if src_size > 0 else 0
+        print(f"   🗜️ Compressed: {os.path.basename(src_path)} ({src_size//1024}KB) → {webp_filename} ({webp_size//1024}KB, -{ratio:.0f}%){dim_note}")
+
+        # Delete original
+        if src_path != webp_path:
+            os.remove(src_path)
+
+        return f"assets/images/works/{webp_filename}"
+    except Exception as e:
+        print(f"   ⚠️ Compression failed for {src_path}: {e}, using original")
+        # Fallback: keep original
+        return f"assets/images/works/{os.path.basename(src_path)}"
+
+
+def download_cover(token, file_token, record_id, fallback_name, stored_token=None):
+    """Download cover image from Feishu, compress to WebP, save to assets directory.
+
+    Re-downloads & re-compresses if:
+    - WebP file doesn't exist locally
     - File token has changed (image updated in Feishu)
     """
     if not file_token:
         return '', file_token
-    # Ensure cover directory exists
     os.makedirs(COVER_DIR, exist_ok=True)
 
-    # Determine extension from original name or default to png
-    ext = '.png'
-    if fallback_name and '.' in fallback_name:
-        ext = '.' + fallback_name.rsplit('.', 1)[-1].lower()
-
-    local_filename = f"{record_id}{ext}"
-    local_path = os.path.join(COVER_DIR, local_filename)
+    # Final output is always .webp
+    webp_filename = f"{record_id}.webp"
+    webp_path = os.path.join(COVER_DIR, webp_filename)
 
     # Check if we need to (re)download
     token_changed = (stored_token is not None and stored_token != file_token)
     if token_changed:
-        print(f"   🔄 Image updated in Feishu (token changed), re-downloading: {local_filename}")
-        # Remove old file so extension change doesn't leave duplicates
+        print(f"   🔄 Image updated in Feishu (token changed), re-downloading: {record_id}")
+        # Clean up any old files for this record (any extension)
         for old_ext in ['.png', '.jpg', '.jpeg', '.webp', '.gif']:
             old_path = os.path.join(COVER_DIR, f"{record_id}{old_ext}")
-            if old_path != local_path and os.path.exists(old_path):
+            if os.path.exists(old_path):
                 os.remove(old_path)
                 print(f"   🗑️ Removed old: {record_id}{old_ext}")
 
-    if not token_changed and os.path.exists(local_path) and os.path.getsize(local_path) > 0:
-        print(f"   📎 Cover already exists: {local_filename}")
-        return f"assets/images/works/{local_filename}", file_token
+    # Cache hit: WebP already exists and token unchanged
+    if not token_changed and os.path.exists(webp_path) and os.path.getsize(webp_path) > 0:
+        print(f"   📎 Cover already exists: {webp_filename}")
+        return f"assets/images/works/{webp_filename}", file_token
+
+    # Determine extension for temp file from original name
+    ext = '.png'
+    if fallback_name and '.' in fallback_name:
+        ext = '.' + fallback_name.rsplit('.', 1)[-1].lower()
+    temp_filename = f"{record_id}_tmp{ext}"
+    temp_path = os.path.join(COVER_DIR, temp_filename)
 
     # Download via Feishu media API
     url = f"https://open.feishu.cn/open-apis/drive/v1/medias/{file_token}/download"
@@ -96,10 +157,12 @@ def download_cover(token, file_token, record_id, fallback_name, stored_token=Non
             resp = urllib.request.urlopen(req, context=ctx, timeout=30)
             img_data = resp.read()
             if len(img_data) > 0:
-                with open(local_path, 'wb') as f:
+                with open(temp_path, 'wb') as f:
                     f.write(img_data)
-                print(f"   🖼️ Downloaded cover: {local_filename} ({len(img_data)//1024}KB)")
-                return f"assets/images/works/{local_filename}", file_token
+                print(f"   📥 Downloaded: {temp_filename} ({len(img_data)//1024}KB)")
+                # Compress to WebP
+                result_path, result_token = compress_to_webp(temp_path, record_id), file_token
+                return result_path, result_token
             else:
                 print(f"   ⚠️ Empty image data for {record_id}")
                 break
@@ -109,6 +172,9 @@ def download_cover(token, file_token, record_id, fallback_name, stored_token=Non
                 time.sleep(1)
             else:
                 print(f"   ❌ Failed to download cover for {record_id}: {e}")
+    # Clean up temp file if download failed
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
     return '', file_token
 
 
